@@ -120,7 +120,7 @@
   </div>
 
   <script>
-    const packages = [
+      const packages = [
       { name: "11", price: 0.01 }, { name: "22", price: 0.50 }, { name: "86", price: 1.25 },
       { name: "172", price: 2.45 }, { name: "257", price: 3.50 }, { name: "343", price: 4.63 },
       { name: "429", price: 5.70 }, { name: "514", price: 6.80 }, { name: "600", price: 7.90 },
@@ -133,16 +133,14 @@
       { name: "9288", price: 116.00 }, 
       { name: "Weekly", price: 1.40, image: "mlweekly.jpg" }, 
       { name: "2Weekly", price: 2.80, image: "mlweekly.jpg" },
-      { name: "3Weekly", price: 4.20, image: "mlweekly.jpg" }, 
-      { name: "4Weekly", price: 5.60, image: "mlweekly.jpg" }, 
-      { name: "5Weekly", price: 7.00, image: "mlweekly.jpg" },
-      { name: "Twilight", price: 7.35, image: "starlight.jpg" },
+     { name: "3Weekly", price: 4.20, image: "mlweekly.jpg" }, 
+     { name: "4Weekly", price: 5.60, image: "mlweekly.jpg" }, 
+     { name: "5Weekly", price: 7.00, image: "mlweekly.jpg" },
+     { name: "Twilight", price: 7.35, image: "starlight.jpg" },
     ];
 
     const grid = document.getElementById("packageGrid");
     const buyNowBtn = document.getElementById("buyNowBtn");
-    const khqrCheck = document.getElementById("khqrCheck");
-    const khqrCard = document.getElementById("khqrCard");
     let selectedPrice = 0;
     let selectedName = "";
     let currentTransaction = null;
@@ -150,14 +148,14 @@
 
     // Initialize package grid
     packages.forEach(pkg => {
-      const card = document.createElement("div");
-      card.className = "card";
-      card.dataset.name = pkg.name;
-      card.dataset.price = pkg.price;
-      card.innerHTML = `
-        <img src="/static/images/${pkg.image || 'diamond.jpg'}" alt="Diamond" />
-        <h2>${pkg.name} ${pkg.name.includes('Weekly') ? 'Pass' : 'Diamonds'}</h2>
-        <p class="new-price">$${pkg.price.toFixed(2)}</p>
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.name = pkg.name;
+    card.dataset.price = pkg.price;
+    card.innerHTML = `
+      <img src="/static/images/${pkg.image || 'diamond.jpg'}" alt="Diamond" />
+      <h2>${pkg.name} ${pkg.name.includes('Weekly') ? 'Pass' : 'Diamonds'}</h2>
+      <p class="new-price">$${pkg.price.toFixed(2)}</p>
       `;
       card.onclick = () => {
         document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
@@ -168,11 +166,6 @@
       };
       grid.appendChild(card);
     });
-
-    function toggleKhqrSelection() {
-        khqrCheck.checked = !khqrCheck.checked;
-        khqrCard.classList.toggle('selected', khqrCheck.checked);
-    }
 
     async function checkUsername() {
       const id = document.getElementById('idInput').value.trim();
@@ -199,10 +192,6 @@
 
     function openModal() {
       document.getElementById('bakongModal').style.display = 'block';
-      document.getElementById('amountDisplay').textContent = selectedPrice.toFixed(2);
-      document.getElementById('countdownDisplay').textContent = '05:00';
-      document.getElementById('statusMessage').textContent = '';
-      document.getElementById('bakongQR').src = '';
     }
 
     function closeModal() {
@@ -240,11 +229,6 @@
     }
 
     async function generateBakongQR(playerId, zoneId) {
-      const statusMessage = document.getElementById('statusMessage');
-      statusMessage.textContent = "Generating QR code...";
-      statusMessage.className = "";
-      document.getElementById('buyNowBtn').disabled = true;
-
       try {
         const response = await fetch('/generate_qr', {
           method: 'POST',
@@ -278,20 +262,19 @@
         // Display QR code
         document.getElementById('bakongQR').src = `data:image/png;base64,${result.qr_image}`;
         
+        // Enable check button
+        document.getElementById('checkPaymentBtn').disabled = false;
+        
         // Update status
-        statusMessage.textContent = "Scan to pay with any banking app.";
-        statusMessage.className = "success";
-        document.getElementById('downloadBtn').disabled = false;
+        document.getElementById('bakongStatus').textContent = `Scan to pay $${selectedPrice.toFixed(2)}`;
         
         // Start countdown
         startCountdown();
         
       } catch (error) {
-        statusMessage.textContent = `Error: ${error.message}`;
-        statusMessage.className = "error";
+        document.getElementById('bakongStatus').textContent = `Error: ${error.message}`;
+        document.getElementById('bakongStatus').style.color = '#f44336';
         console.error(error);
-      } finally {
-        document.getElementById('buyNowBtn').disabled = false;
       }
     }
 
@@ -305,24 +288,79 @@
       if (!currentTransaction) return;
       
       const now = new Date();
-      const remaining = (currentTransaction.expiry - now) / 1000;
-      const countdownDisplay = document.getElementById('countdownDisplay');
-
+      const remaining = currentTransaction.expiry - now;
+      
       if (remaining <= 0) {
         clearInterval(countdownInterval);
-        countdownDisplay.textContent = 'QR Code Expired';
-        countdownDisplay.style.color = '#dc3545';
-        document.getElementById('statusMessage').textContent = 'QR expired. Please try again.';
-        document.getElementById('downloadBtn').disabled = true;
+        document.getElementById('bakongCountdown').textContent = 'QR Code Expired';
+        document.getElementById('bakongCountdown').style.color = '#f44336';
+        document.getElementById('checkPaymentBtn').disabled = true;
+        document.getElementById('bakongStatus').textContent = 'QR expired. Please try again.';
         return;
       }
       
-      const mins = Math.floor(remaining / 60);
-      const secs = Math.floor(remaining % 60);
-      const countdownText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      const mins = Math.floor(remaining / 60000);
+      const secs = Math.floor((remaining % 60000) / 1000);
+      const countdownText = `Expires in: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
       
-      countdownDisplay.textContent = countdownText;
-      countdownDisplay.style.color = (mins === 0 && secs < 30) ? '#dc3545' : '#ff0000';
+      document.getElementById('bakongCountdown').textContent = countdownText;
+      document.getElementById('bakongCountdown').style.color = (mins === 0 && secs < 30) ? '#f44336' : 'white';
+    }
+
+    async function checkBakongPayment() {
+      if (!currentTransaction) {
+        alert('No active transaction to check');
+        return;
+      }
+      
+      // Disable button during check
+      document.getElementById('checkPaymentBtn').disabled = true;
+      document.getElementById('bakongStatus').textContent = 'Checking payment...';
+      
+      try {
+        const response = await fetch('/check_payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            transaction_id: currentTransaction.id
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.error || 'Payment check failed');
+        }
+        
+        if (result.status === 'PAID') {
+          // Payment successful
+          clearInterval(countdownInterval);
+          document.getElementById('bakongCountdown').textContent = 'Payment Received!';
+          document.getElementById('bakongCountdown').style.color = '#4caf50';
+          document.getElementById('bakongStatus').textContent = result.message;
+          
+          // Show invoice
+          showInvoice(currentTransaction);
+          
+          // Close payment modal after 0.5 second
+          setTimeout(closeModal, 500);
+        } else if (result.status === 'EXPIRED') {
+          clearInterval(countdownInterval);
+          document.getElementById('bakongCountdown').textContent = 'QR Code Expired';
+          document.getElementById('bakongCountdown').style.color = '#f44336';
+          document.getElementById('bakongStatus').textContent = result.message;
+        } else {
+          document.getElementById('bakongStatus').textContent = result.message;
+          document.getElementById('checkPaymentBtn').disabled = false;
+        }
+      } catch (error) {
+        document.getElementById('bakongStatus').textContent = `Error: ${error.message}`;
+        document.getElementById('bakongStatus').style.color = '#f44336';
+        document.getElementById('checkPaymentBtn').disabled = false;
+        console.error(error);
+      }
     }
 
     function showInvoice(transaction) {
@@ -353,14 +391,11 @@
       document.getElementById('idInput').value = '';
       document.getElementById('zoneInput').value = '';
       document.getElementById('usernameDisplay').textContent = '';
-      khqrCheck.checked = false;
-      khqrCard.classList.remove('selected');
+      document.getElementById('khqrCheck').checked = false;
       
       // Reset package selection
       document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
-      selectedPrice = 0;
-      selectedName = "";
-      buyNowBtn.textContent = 'Buy Now $0.00';
+      document.getElementById('buyNowBtn').textContent = 'Buy Now $0.00';
       
       // Scroll to top
       window.scrollTo(0, 0);
