@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mobile Legends Top-up</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
+
+</head>
+<body>
+  <header>
+    <img src="/static/images/logo.jpg" alt="Mobile Legends Logo" class="ml-logo" />
+    MENG TOPUP
+  </header>
+
+  <main>
+    <section class="banner frame">
+  <div class="banner-content">
+    <div class="game-title">
+      <img src="/static/images/mlbb-logo1.png" alt="Mobile Legends Logo" class="ml1-logo" />
+      <h3 class="khmer-heading">Mobile Legend BANG BANG</h3>
+    </div>
+    <h3 class="khmer-heading">ទិញពេជ្រ Mobile Legends: Bang Bang ក្នុងតម្លៃសមរម្យ! តាមរយះអាយឌី ID របស់អ្នក</h3>
+  </div>
+</section>
+
+    <h3 class="khmer-heading">1. បញ្ចូលព័ត៌មាន</h3>
+    <section class="user-input frame">
+      <div class="input-row">
+        <input type="number" id="idInput" placeholder="Player ID" />
+        <input type="number" id="zoneInput" placeholder="Zone ID" />
+      </div>
+      <button onclick="checkUsername()">Check Username</button>
+      <div id="usernameDisplay"></div>
+    </section>
+
+    <section>
+      <h3 class="khmer-heading">2. ជ្រើសរើសកញ្ចប់</h3>
+      <div class="frame">
+        <div class="pricing-grid" id="packageGrid"></div>
+      </div>
+    </section>
+
+    <section>
+      <h3 class="khmer-heading">3.​ការទូទាត់ប្រាក់</h3>
+      <div class="khqr-card" id="khqrCard">
+        <div class="text-group">
+          <label for="khqrCheck">KHQR</label>
+          <p>scan to pay with any banking app</p>
+        </div>
+        <input type="checkbox" id="khqrCheck" />
+      </div>
+    </section>
+    
+    <section class="banner frame">
+  <div class="banner-content">
+    <div class="game-title">
+      <img src="/static/images/logo.jpg" alt="Mobile Legends Logo" class="ml-logo" />
+      <h3 class="khmer-heading">ហេតុអ្វីអ្នកគួរជ្រើសរើស MENG TOPUP ធ្វើជាកន្លែងបញ្ចូលពេជ្រហ្គេមរបស់អ្នក?</h3>
+    </div>
+    <h4 class="khmer-heading">តម្លៃសមរម្យ សុវត្តិភាព​ និង ទំនុកចិត្ត សេវាកម្មរហ័ស</h4>
+  </div>
+</section>
+
+  </main>
+
+  <button onclick="initiatePayment()" id="buyNowBtn">Buy Now $0.00</button>
+
+  <!-- Bakong Payment Modal -->
+  <div id="bakongModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2>Bakong Payment</h2>
+      <div id="bakongStatus">Ready to generate payment QR</div>
+      
+      <div class="qr-container">
+        <div class="qr-image">
+          <img id="bakongQR" src="" alt="QR Code">
+        </div>
+      </div>
+      
+      <div id="bakongCountdown"></div>
+      
+      <div class="modal-buttons">
+        <button id="checkPaymentBtn" class="bakong-btn" onclick="checkBakongPayment()" disabled>Check Payment</button>
+        <button class="bakong-btn" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Invoice Modal -->
+  <div id="invoiceModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeInvoiceModal()">&times;</span>
+      <h2>Payment Successful</h2>
+      
+      <div class="invoice-details">
+        <div class="invoice-row">
+          <span class="invoice-icon">👤</span>
+          <span class="invoice-label">Username:</span>
+          <span class="invoice-value" id="invoice-username"></span>
+        </div>
+        <div class="invoice-row">
+          <span class="invoice-icon">🆔</span>
+          <span class="invoice-label">Player ID:</span>
+          <span class="invoice-value" id="invoice-playerid"></span>
+        </div>
+        <div class="invoice-row">
+          <span class="invoice-icon">🌐</span>
+          <span class="invoice-label">Zone ID:</span>
+          <span class="invoice-value" id="invoice-zoneid"></span>
+        </div>
+        <div class="invoice-row">
+          <span class="invoice-icon">🎮</span>
+          <span class="invoice-label">Package:</span>
+          <span class="invoice-value" id="invoice-package"></span>
+        </div>
+        <div class="invoice-row">
+          <span class="invoice-icon">💵</span>
+          <span class="invoice-label">Amount:</span>
+          <span class="invoice-value" id="invoice-amount"></span>
+        </div>
+        <div class="invoice-row">
+          <span class="invoice-icon">📅</span>
+          <span class="invoice-label">Date:</span>
+          <span class="invoice-value" id="invoice-date"></span>
+        </div>
+      </div>
+      
+      <button class="bakong-btn" onclick="backToTopup()" style="margin-top: 20px;">Back to Top-up</button>
+    </div>
+  </div>
+
+  <script>
+    const packages = [
+      { name: "11", price: 0.01 }, { name: "22", price: 0.50 }, { name: "86", price: 1.25 },
+      { name: "172", price: 2.45 }, { name: "257", price: 3.50 }, { name: "343", price: 4.63 },
+      { name: "429", price: 5.70 }, { name: "514", price: 6.80 }, { name: "600", price: 7.90 },
+      { name: "706", price: 9.10 }, { name: "792", price: 9.95 }, { name: "878", price: 12.10 },
+      { name: "963", price: 12.10 }, { name: "1050", price: 13.40 }, { name: "1135", price: 14.42 },
+      { name: "1412", price: 17.80 }, { name: "1584", price: 19.99 }, { name: "1755", price: 23.28 },
+      { name: "1926", price: 24.89 }, { name: "2195", price: 27.37 }, { name: "2538", price: 31.60 },
+      { name: "2901", price: 35.72 }, { name: "4394", price: 52.80 }, { name: "5532", price: 65.80 },
+      { name: "6238", price: 77.15 }, { name: "6944", price: 85.50 }, { name: "8433", price: 0.00 },
+      { name: "9288", price: 116.00 }, 
+      { name: "Weekly", price: 1.40, image: "mlweekly.jpg" }, 
+      { name: "2Weekly", price: 2.80, image: "mlweekly.jpg" },
+     { name: "3Weekly", price: 4.20, image: "mlweekly.jpg" }, 
+     { name: "4Weekly", price: 5.60, image: "mlweekly.jpg" }, 
+     { name: "5Weekly", price: 7.00, image: "mlweekly.jpg" },
+     { name: "Twilight", price: 7.35, image: "starlight.jpg" },
+    ];
+
+    const grid = document.getElementById("packageGrid");
+    const buyNowBtn = document.getElementById("buyNowBtn");
+    let selectedPrice = 0;
+    let selectedName = "";
+    let currentTransaction = null;
+    let countdownInterval = null;
+
+    // Initialize package grid
+    packages.forEach(pkg => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.name = pkg.name;
+    card.dataset.price = pkg.price;
+    card.innerHTML = `
+      <img src="/static/images/${pkg.image || 'diamond.jpg'}" alt="Diamond" />
+      <h2>${pkg.name} ${pkg.name.includes('Weekly') ? 'Pass' : 'Diamonds'}</h2>
+      <p class="new-price">$${pkg.price.toFixed(2)}</p>
+      `;
+      card.onclick = () => {
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectedPrice = pkg.price;
+        selectedName = pkg.name;
+        buyNowBtn.textContent = `Buy Now $${selectedPrice.toFixed(2)}`;
+      };
+      grid.appendChild(card);
+    });
+
+    async function checkUsername() {
+      const id = document.getElementById('idInput').value.trim();
+      const zone = document.getElementById('zoneInput').value.trim();
+      const display = document.getElementById('usernameDisplay');
+      if (!id || !zone) {
+        display.textContent = "⚠️ Please enter both Player ID and Zone ID.";
+        return;
+      }
+      display.textContent = "Checking username...";
+      try {
+        const url = `https://api.isan.eu.org/nickname/ml?id=${encodeURIComponent(id)}&zone=${encodeURIComponent(zone)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.success && data.name) {
+          display.textContent = `✅ Username: ${data.name}`;
+        } else {
+          display.textContent = "❌ Username not found.";
+        }
+      } catch (err) {
+        display.textContent = "⚠️ Error fetching data.";
+      }
+    }
+
+    function openModal() {
+      document.getElementById('bakongModal').style.display = 'block';
+    }
+
+    function closeModal() {
+      document.getElementById('bakongModal').style.display = 'none';
+      if (countdownInterval) clearInterval(countdownInterval);
+      currentTransaction = null;
+    }
+
+    function closeInvoiceModal() {
+      document.getElementById('invoiceModal').style.display = 'none';
+    }
+
+    function initiatePayment() {
+      const id = document.getElementById('idInput').value.trim();
+      const zone = document.getElementById('zoneInput').value.trim();
+      const khqr = document.getElementById('khqrCheck').checked;
+      
+      if (!id || !zone) {
+        alert('Please fill Player ID and Zone ID.');
+        return;
+      }
+      
+      if (!selectedName) {
+        alert('Please select a package.');
+        return;
+      }
+      
+      if (!khqr) {
+        alert('Please check KHQR payment method.');
+        return;
+      }
+      
+      openModal();
+      generateBakongQR(id, zone);
+    }
+
+    async function generateBakongQR(playerId, zoneId) {
+      try {
+        const response = await fetch('/generate_qr', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            amount: selectedPrice,
+            player_id: playerId,
+            zone_id: zoneId,
+            package: selectedName
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to generate QR');
+        }
+        
+        // Store current transaction
+        currentTransaction = {
+          id: result.transaction_id,
+          amount: result.amount,
+          expiry: new Date(result.expiry),
+          playerId: playerId,
+          zoneId: zoneId,
+          package: selectedName
+        };
+        
+        // Display QR code
+        document.getElementById('bakongQR').src = `data:image/png;base64,${result.qr_image}`;
+        
+        // Enable check button
+        document.getElementById('checkPaymentBtn').disabled = false;
+        
+        // Update status
+        document.getElementById('bakongStatus').textContent = `Scan to pay $${selectedPrice.toFixed(2)}`;
+        
+        // Start countdown
+        startCountdown();
+        
+      } catch (error) {
+        document.getElementById('bakongStatus').textContent = `Error: ${error.message}`;
+        document.getElementById('bakongStatus').style.color = '#f44336';
+        console.error(error);
+      }
+    }
+
+    function startCountdown() {
+      if (countdownInterval) clearInterval(countdownInterval);
+      updateCountdown();
+      countdownInterval = setInterval(updateCountdown, 1000);
+    }
+
+    function updateCountdown() {
+      if (!currentTransaction) return;
+      
+      const now = new Date();
+      const remaining = currentTransaction.expiry - now;
+      
+      if (remaining <= 0) {
+        clearInterval(countdownInterval);
+        document.getElementById('bakongCountdown').textContent = 'QR Code Expired';
+        document.getElementById('bakongCountdown').style.color = '#f44336';
+        document.getElementById('checkPaymentBtn').disabled = true;
+        document.getElementById('bakongStatus').textContent = 'QR expired. Please try again.';
+        return;
+      }
+      
+      const mins = Math.floor(remaining / 60000);
+      const secs = Math.floor((remaining % 60000) / 1000);
+      const countdownText = `Expires in: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      
+      document.getElementById('bakongCountdown').textContent = countdownText;
+      document.getElementById('bakongCountdown').style.color = (mins === 0 && secs < 30) ? '#f44336' : 'white';
+    }
+
+    async function checkBakongPayment() {
+      if (!currentTransaction) {
+        alert('No active transaction to check');
+        return;
+      }
+      
+      // Disable button during check
+      document.getElementById('checkPaymentBtn').disabled = true;
+      document.getElementById('bakongStatus').textContent = 'Checking payment...';
+      
+      try {
+        const response = await fetch('/check_payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            transaction_id: currentTransaction.id
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.error || 'Payment check failed');
+        }
+        
+        if (result.status === 'PAID') {
+          // Payment successful
+          clearInterval(countdownInterval);
+          document.getElementById('bakongCountdown').textContent = 'Payment Received!';
+          document.getElementById('bakongCountdown').style.color = '#4caf50';
+          document.getElementById('bakongStatus').textContent = result.message;
+          
+          // Show invoice
+          showInvoice(currentTransaction);
+          
+          // Close payment modal after 0.5 second
+          setTimeout(closeModal, 500);
+        } else if (result.status === 'EXPIRED') {
+          clearInterval(countdownInterval);
+          document.getElementById('bakongCountdown').textContent = 'QR Code Expired';
+          document.getElementById('bakongCountdown').style.color = '#f44336';
+          document.getElementById('bakongStatus').textContent = result.message;
+        } else {
+          document.getElementById('bakongStatus').textContent = result.message;
+          document.getElementById('checkPaymentBtn').disabled = false;
+        }
+      } catch (error) {
+        document.getElementById('bakongStatus').textContent = `Error: ${error.message}`;
+        document.getElementById('bakongStatus').style.color = '#f44336';
+        document.getElementById('checkPaymentBtn').disabled = false;
+        console.error(error);
+      }
+    }
+
+    function showInvoice(transaction) {
+      const now = new Date();
+      
+      // Get username (remove the ✅ prefix if exists)
+      let username = document.getElementById('usernameDisplay').textContent;
+      if (username.includes('✅ Username: ')) {
+        username = username.replace('✅ Username: ', '');
+      }
+      
+      // Fill invoice details
+      document.getElementById('invoice-username').textContent = username || 'N/A';
+      document.getElementById('invoice-playerid').textContent = transaction.playerId;
+      document.getElementById('invoice-zoneid').textContent = transaction.zoneId;
+      document.getElementById('invoice-package').textContent = transaction.package;
+      document.getElementById('invoice-amount').textContent = '$' + transaction.amount.toFixed(2);
+      document.getElementById('invoice-date').textContent = now.toLocaleString();
+      
+      // Show invoice modal
+      document.getElementById('invoiceModal').style.display = 'block';
+    }
+
+    function backToTopup() {
+      closeInvoiceModal();
+      
+      // Reset form
+      document.getElementById('idInput').value = '';
+      document.getElementById('zoneInput').value = '';
+      document.getElementById('usernameDisplay').textContent = '';
+      document.getElementById('khqrCheck').checked = false;
+      
+      // Reset package selection
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+      document.getElementById('buyNowBtn').textContent = 'Buy Now $0.00';
+      
+      // Scroll to top
+      window.scrollTo(0, 0);
+    }
+  </script>
+</body>
+</html>
