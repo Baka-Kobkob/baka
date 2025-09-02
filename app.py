@@ -43,8 +43,8 @@ def generate_qr():
         
         # Create QR data
         qr_data = khqr.create_qr(
-            bank_account='meng_topup@aclb',
-            merchant_name='Meng Topup',
+            bank_account='veasna_mom1@trmc',
+            merchant_name='GOTA TOPUP',
             merchant_city='Phnom Penh',
             amount=amount,
             currency='USD',
@@ -135,9 +135,9 @@ def send_to_telegram(transaction):
     try:
         import requests
         requests.post(
-            'https://api.telegram.org/bot8039794961:AAHsZCVdd9clK7uYtCJaUKH8JKjlLLWefOM/sendMessage',
+            'https://api.telegram.org/bot8370377268:AAGwzEcBfXuBqOmhOdZ7NNVSYPpoK43wv38/sendMessage',
             json={
-                'chat_id': '-1002796371372',
+                'chat_id': '-1002267674914',
                 'text': text
             }
         )
