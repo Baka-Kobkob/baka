@@ -120,7 +120,7 @@
   </div>
 
   <script>
-     const packages = [
+  const packages = [
   { name: "11", price: 0.01 }, { name: "22", price: 0.50 }, { name: "86", price: 1.25 },
   { name: "172", price: 2.45 }, { name: "257", price: 3.50 }, { name: "343", price: 4.63 },
   { name: "429", price: 5.70 }, { name: "514", price: 6.80 }, { name: "600", price: 7.90 },
@@ -207,9 +207,11 @@ async function initiatePayment() {
 
   openModal();
   await generateBakongQR(id, zone);
-
-  startCountdown();
-  startAutoPaymentCheck();
+  
+  // You no longer need these two lines here. 
+  // The startAutoPaymentCheck() is now called inside generateBakongQR()
+  // startCountdown();
+  // startAutoPaymentCheck();
 }
 
 async function generateBakongQR(playerId, zoneId) {
@@ -226,6 +228,11 @@ async function generateBakongQR(playerId, zoneId) {
     document.getElementById('bakongQR').src = `data:image/png;base64,${result.qr_image}`;
     document.getElementById('checkPaymentBtn').disabled = false;
     document.getElementById('bakongStatus').textContent = `Scan to pay $${selectedPrice.toFixed(2)}`;
+    
+    // ⭐ NEW: Start countdown and auto check here
+    startCountdown();
+    startAutoPaymentCheck();
+
   } catch (error) {
     document.getElementById('bakongStatus').textContent = `Error: ${error.message}`;
     document.getElementById('bakongStatus').style.color = '#f44336';
@@ -334,7 +341,7 @@ function backToTopup() {
   document.getElementById('khqrCheck').checked = false;
   document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
   buyNowBtn.textContent = 'Buy Now $0.00';
-  window.scrollTo(0, 0);    
+  window.scrollTo(0, 0);
 }
   </script>
 </body>
