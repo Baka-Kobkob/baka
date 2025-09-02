@@ -74,7 +74,6 @@
 </div>
 <div class="english-heading" id="bakongCountdown"></div>
 <div class="modal-buttons">
-          <button id="checkPaymentBtn" class="bakong-btn" onclick="checkBakongPayment()" disabled>Check Payment</button>
 <button class="bakong-btn khmer-heading" onclick="closeModal()">បោះបង់</button>
 </div>
 </div>
@@ -148,71 +147,17 @@ let currentTransaction = null;
 let countdownInterval = null;
 let paymentCheckInterval = null;
 
-// -------------------- Initialize Package Grid --------------------
-packages.forEach(pkg => {
-  const card = document.createElement("div");
-  card.className = "card";
-  card.dataset.name = pkg.name;
-  card.dataset.price = pkg.price;
-  card.innerHTML = `
-    <img src="/static/images/${pkg.image || 'diamond.jpg'}" alt="Diamond" />
-    <h2>${pkg.name} ${pkg.name.includes('Weekly') ? 'Pass' : 'Diamonds'}</h2>
-    <p class="new-price">$${pkg.price.toFixed(2)}</p>
-  `;
-  card.onclick = () => {
-    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
-    card.classList.add('selected');
-    selectedPrice = pkg.price;
-    selectedName = pkg.name;
-    buyNowBtn.textContent = `Buy Now $${selectedPrice.toFixed(2)}`;
-  };
-  grid.appendChild(card);
-});
-
-// -------------------- Username Check --------------------
-async function checkUsername() {
-  const id = document.getElementById('idInput').value.trim();
-  const zone = document.getElementById('zoneInput').value.trim();
-  const display = document.getElementById('usernameDisplay');
-  if (!id || !zone) { display.textContent = "⚠️ Please enter both Player ID and Zone ID."; return; }
-  display.textContent = "Checking username...";
-  try {
-    const url = `https://api.isan.eu.org/nickname/ml?id=${encodeURIComponent(id)}&zone=${encodeURIComponent(zone)}`;
-    const res = await fetch(url);
-    const data = await res.json();
-    display.textContent = (data.success && data.name) ? `✅ Username: ${data.name}` : "❌ Username not found.";
-  } catch {
-    display.textContent = "⚠️ Error fetching data.";
-  }
-}
-
-// -------------------- Modal Controls --------------------
-function openModal() { document.getElementById('bakongModal').style.display = 'block'; }
-function closeModal() {
-  document.getElementById('bakongModal').style.display = 'none';
-  clearInterval(countdownInterval);
-  stopAutoPaymentCheck();
-  currentTransaction = null;
-}
-function closeInvoiceModal() { document.getElementById('invoiceModal').style.display = 'none'; }
-
-// -------------------- Payment --------------------
-async function initiatePayment() {
+function initiatePayment() {
   const id = document.getElementById('idInput').value.trim();
   const zone = document.getElementById('zoneInput').value.trim();
   const khqr = document.getElementById('khqrCheck').checked;
-
+  
   if (!id || !zone) { alert('Please fill Player ID and Zone ID.'); return; }
   if (!selectedName) { alert('Please select a package.'); return; }
   if (!khqr) { alert('Please check KHQR payment method.'); return; }
 
   openModal();
-  await generateBakongQR(id, zone);
-  
-  // You no longer need these two lines here. 
-  // The startAutoPaymentCheck() is now called inside generateBakongQR()
-  // startCountdown();
-  // startAutoPaymentCheck();
+  generateBakongQR(id, zone);
 }
 
 async function generateBakongQR(playerId, zoneId) {
@@ -220,27 +165,132 @@ async function generateBakongQR(playerId, zoneId) {
     const response = await fetch('/generate_qr', {
       method: 'POST',
       headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      body: new URLSearchParams({ amount: selectedPrice, player_id: playerId, zone_id: zoneId, package: selectedName })
+      body: new URLSearchParams({
+        amount: selectedPrice, player_id: playerId, zone_id: zoneId, package: selectedName
+      })
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Failed to generate QR');
 
-    currentTransaction = { id: result.transaction_id, amount: result.amount, expiry: new Date(result.expiry), playerId, zoneId, package: selectedName };
-    document.getElementById('bakongQR').src = `data:image/png;base64,${result.qr_image}`;
-    document.getElementById('checkPaymentBtn').disabled = false;
-    document.getElementById('bakongStatus').textContent = `Scan to pay $${selectedPrice.toFixed(2)}`;
-    
-    // ⭐ NEW: Start countdown and auto check here
+    currentTransaction = {
+      id: result.transaction_id,
+      amount: result.amount,
+      expiry: new Date(result.expiry),
+      playerId,
+      zoneId,
+      package: selectedName
+    };
+
+    // Set QR
+    const qrImg = document.getElementById('bakongQR');
+    if (qrImg) qrImg.src = `data:image/png;base64,${result.qr_image}`;
+
+    // Status
+    const statusEl = document.getElementById('bakongStatus');
+    if (statusEl) statusEl.textContent = `Scan to pay $${selectedPrice.toFixed(2)}`;
+
     startCountdown();
-    startAutoPaymentCheck();
+    startAutoPaymentCheck(); // ⭐ Auto-check payment
 
   } catch (error) {
-    document.getElementById('bakongStatus').textContent = `Error: ${error.message}`;
-    document.getElementById('bakongStatus').style.color = '#f44336';
+    const statusEl = document.getElementById('bakongStatus');
+    if (statusEl) {
+      statusEl.textContent = `Error: ${error.message}`;
+      statusEl.style.color = '#f44336';
+    }
     console.error(error);
   }
 }
 
+// ---------------- Countdown ----------------
+function startCountdown() {
+  clearInterval(countdownInterval);
+  updateCountdown();
+  countdownInterval = setInterval(updateCountdown, 1000);
+}
+
+function updateCountdown() {
+  if (!currentTransaction) return;
+  const remaining = currentTransaction.expiry - new Date();
+  const countdownEl = document.getElementById('bakongCountdown');
+  if (!countdownEl) return;
+
+  if (remaining <= 0) {
+    clearInterval(countdownInterval);
+    stopAutoPaymentCheck();
+    countdownEl.textContent = 'QR Code Expired';
+    countdownEl.style.color = '#f44336';
+    return;
+  }
+
+  const mins = Math.floor(remaining / 60000);
+  const secs = Math.floor((remaining % 60000) / 1000);
+  countdownEl.textContent = `Expires in: ${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+  countdownEl.style.color = (mins===0 && secs<30) ? '#f44336' : 'white';
+}
+
+// ---------------- Auto Payment Check ----------------
+function startAutoPaymentCheck() {
+  stopAutoPaymentCheck();
+  checkBakongPayment(); // Initial check
+  paymentCheckInterval = setInterval(checkBakongPayment, 5000); // check every 5s
+}
+
+function stopAutoPaymentCheck() {
+  if (paymentCheckInterval) clearInterval(paymentCheckInterval);
+  paymentCheckInterval = null;
+}
+
+// ---------------- Check Payment ----------------
+async function checkBakongPayment() {
+  if (!currentTransaction) return;
+
+  try {
+    const response = await fetch('/check_payment', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({ transaction_id: currentTransaction.id })
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Payment check failed');
+
+    const statusEl = document.getElementById('bakongStatus');
+    const countdownEl = document.getElementById('bakongCountdown');
+
+    if (result.status === 'PAID') {
+      clearInterval(countdownInterval);
+      stopAutoPaymentCheck();
+      if (statusEl) {
+        statusEl.textContent = result.message || 'Payment Received!';
+        statusEl.style.color = '#4caf50';
+      }
+      if (countdownEl) countdownEl.textContent = 'Payment Received!';
+      showInvoice(currentTransaction);
+
+      // Do NOT auto close modal, let user see invoice
+      currentTransaction = null;
+
+    } else if (result.status === 'EXPIRED') {
+      clearInterval(countdownInterval);
+      stopAutoPaymentCheck();
+      if (statusEl) {
+        statusEl.textContent = result.message || 'QR Expired';
+        statusEl.style.color = '#f44336';
+      }
+      if (countdownEl) countdownEl.textContent = 'QR Code Expired';
+      currentTransaction = null;
+
+    } else {
+      if (statusEl) statusEl.textContent = result.message || 'Waiting for payment...';
+    }
+
+  } catch (error) {
+    const statusEl = document.getElementById('bakongStatus');
+    if (statusEl) statusEl.textContent = `Error: ${error.message}`;
+    if (statusEl) statusEl.style.color = '#f44336';
+    console.error(error);
+  }
+      }
 // -------------------- Countdown --------------------
 function startCountdown() {
   clearInterval(countdownInterval);
