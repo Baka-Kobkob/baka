@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>MENG TOPUP - Mobile Legends</title>
+  <title>Gota Shop - Mobile Legends</title>
   <link rel="stylesheet" href="/static/styles.css" />
   <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <header>
     <img src="/static/images/logo.jpg" alt="Logo" />
-    MENG TOPUP
+    Gota TOPUP
   </header>
 
   <main>
@@ -62,26 +62,21 @@
   </main>
 
   <button onclick="initiatePayment()" id="buyNowBtn">Buy Now $0.00</button>
-
-<div id="bakongModal" class="payment-box">
-  <span class="close" onclick="closeModal()">&times;</span>
-  <h2>Pay with KHQR</h2>
-  <div class="qr-card">
-    <div class="qr-header">
-      <img src="/static/images/khqr.jpg" alt="KHQR Logo" class="khqr-logo">
-      <span>KHQR</span>
-    </div>
-    <div class="qr-content">
-      <p class="store-name">MENG TOPUP</p>
-      <p class="amount-display">$<span id="amountDisplay">0.00</span></p>
-      <hr class="dashed-line">
-      <div class="qr-container">
-        <img id="bakongQR" src="khqr.jpg" alt="KHQR">
-      </div>
-    </div>
-  </div>
-  <button id="downloadBtn">Download QR</button>
-  <p id="statusMessage"></p>
+<div class="modal" id="bakongModal">
+<div class="modal-content">
+<span class="close" onclick="closeModal()">×</span>
+<h2 class="english-heading">Bakong Payment</h2>
+<div class="english-heading" id="bakongStatus">Ready to generate payment QR</div>
+<div class="qr-container">
+<div class="qr-image">
+<img alt="QR Code" id="bakongQR" src=""/>
+</div>
+</div>
+<div class="english-heading" id="bakongCountdown"></div>
+<div class="modal-buttons">
+<button class="bakong-btn khmer-heading" onclick="closeModal()">បោះបង់</button>
+</div>
+</div>
 </div>
 
   <div id="invoiceModal" class="modal">
