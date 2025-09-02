@@ -10,7 +10,7 @@ from bakong_khqr import KHQR
 app = Flask(__name__)
 
 # Bakong API setup
-api_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiNmFmM2FlMWU3Yzg4NDQ3OCJ9LCJpYXQiOjE3NDM1MTE4MjUsImV4cCI6MTc1MTI4NzgyNX0.ShQ-iQ96VKcqktZZnigUgqaDuooeuPGpnduzdtNxBGA"
+api_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiYmQwOTRlNGNiMmVlNDdlNCJ9LCJpYXQiOjE3NDkwOTYzMzEsImV4cCI6MTc1Njg3MjMzMX0.ni0qo7UxbrsQ_4P5hliqyVAcIINXQQA-EyCAELf30t4"
 khqr = KHQR(api_token)
 current_transactions = {}
 
