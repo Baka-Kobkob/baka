@@ -66,7 +66,7 @@ def generate_qr():
         qr_base64 = base64.b64encode(img_io.getvalue()).decode('utf-8')
         
         # Store current transaction
-        expiry = datetime.now() + timedelta(minutes=3)
+        expiry = datetime.now() + timedelta(minutes=5)
         current_transactions[transaction_id] = {
             'amount': amount,
             'md5_hash': md5_hash,
