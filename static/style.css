@@ -1,542 +1,431 @@
-/* Base styles */
-body {
-  background-color: #0f0f1a;
-  color: white;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+/* --- GLOBAL STYLES & VARIABLES --- */
+:root {
+  --primary-bg: #f9fbe7; /* Very light yellow/green */
+  --secondary-bg: #ffffff; /* White */
+  --card-bg: #fdfde9;
+  --text-primary: #212121;
+  --text-secondary: #757575;
+  --accent-color: #ffb300; /* Amber/Yellow */
+  --accent-hover: #ffa000;
+  --success-color: #4caf50;
+  --error-color: #d32f2f;
+  --border-color: #e0e0e0;
+  --font-khmer: 'Battambang', sans-serif;
+  --font-english: 'Poppins', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* Banner styles */
-.banner-content {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+body {
+  font-family: var(--font-english);
+  background-color: var(--primary-bg);
+  color: var(--text-primary);
+  padding-bottom: 80px;
 }
 
-.game-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.ml-logo {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-}
-
-.ml1-logo {
-  width: 60px;
-  height: 60px;
-  object-fit: contain;
-}
-
-/* Improved Mobile Layout */
-@media (max-width: 767px) {
-  /* Banner improvements */
-  .banner-content {
-    padding: 15px;
-  }
-
-  .game-title-container {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .ml-logo {
-    width: 50px;
-    height: 50px;
-    flex-shrink: 0;
-  }
-
-  .game-title {
-    font-size: 1.2rem;
-    margin-bottom: 5px;
-    line-height: 1.3;
-  }
-
-  .khmer-heading {
-    font-size: 1rem !important;
-    line-height: 1.4;
-  }
-
-  /* Input improvements */
-  .input-row {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  input[type="number"] {
-    width: 100%;
-    padding: 10px;
-  }
-
-  /* Package grid improvements */
-  .pricing-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-
-  .card {
-    padding: 10px;
-  }
-
-  .card h2 {
-    font-size: 0.85rem;
-  }
-
-  /* KHQR section */
-  .khqr-card {
-    padding: 12px 12px 12px 70px;
-  }
-
-  .khqr-card::before {
-    width: 50px;
-    height: 50px;
-  }
-
-  /* Buy Now button */
-  #buyNowBtn {
-    width: calc(100% - 20px);
-    padding: 12px;
-    font-size: 16px;
-  }
-}
-
-/* Special banner styling */
-.game-title-container {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.ml-logo {
-  width: 60px;
-  height: 60px;
-  object-fit: contain;
-}
-
-.game-title {
-  font-family: 'Battambang', sans-serif;
+.khmer-heading {
+  font-family: var(--font-khmer);
+  color: var(--text-primary);
   font-weight: 700;
-  color: #fff;
-  margin: 0;
-  font-size: 1.5rem;
+  border-left: 4px solid var(--accent-color);
+  padding-left: 10px;
+  margin-bottom: 1rem;
 }
 
-/* Header */
+.khmer-heading.subtitle {
+  font-size: 0.9rem;
+  font-weight: normal;
+  border: none;
+  margin-top: 5px;
+  padding-left: 0;
+}
+
 header {
-  background: #f96d00;
-  color: white;
-  font-size: 1.8rem;
-  padding: 12px 20px 12px 70px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  z-index: 1000;
+  background-color: var(--secondary-bg);
+  color: var(--text-primary);
+  padding: 15px 20px;
   display: flex;
   align-items: center;
-  gap: 15px;
-  box-sizing: border-box;
+  font-size: 1.5rem;
+  font-weight: bold;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 header img {
   width: 40px;
   height: 40px;
-  object-fit: contain;
-  position: absolute;
-  left: 15px;
+  border-radius: 50%;
+  margin-right: 15px;
 }
 
-/* Main container */
 main {
-  max-width: 900px;
-  margin: 80px auto 90px;
-  padding: 0 15px;
-  box-sizing: border-box;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 0 1rem;
 }
 
-/* Sections with border frames */
 section {
-  margin-bottom: 20px;
-  border: 2px solid #333;
-  border-radius: 8px;
-  padding: 12px;
-  box-sizing: border-box;
+  background-color: var(--secondary-bg);
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
-/* Input row for Player ID and Zone ID */
+.banner {
+  background: linear-gradient(90deg, #ffb300, #ffca28);
+  border: none;
+}
+
+.game-title {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.game-title .ff-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
 .input-row {
   display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 1rem;
 }
 
 input[type="number"] {
-  flex: 1;
-  min-width: 120px;
-  padding: 8px;
-  border-radius: 5px;
-  border: none;
-  font-size: 15px;
-  box-sizing: border-box;
-}
-
-/* Buttons */
-button {
-  background: #f96d00;
-  color: white;
-  border: none;
-  padding: 10px 14px;
-  border-radius: 5px;
-  font-size: 15px;
-  cursor: pointer;
-  margin-top: 8px;
   width: 100%;
-  box-sizing: border-box;
-  transition: background-color 0.2s ease;
+  padding: 12px;
+  background-color: var(--primary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  -moz-appearance: textfield;
 }
 
-button:hover {
-  background: #e67e22;
+.user-input button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--accent-color);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-/* Username display */
+.user-input button:hover {
+  background-color: var(--accent-hover);
+}
+
 #usernameDisplay {
-  margin-top: 8px;
-  font-size: 15px;
-  min-height: 1.2em;
+  margin-top: 1rem;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
 }
 
-/* Package Grid */
 .pricing-grid {
   display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  box-sizing: border-box;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 15px;
 }
 
-/* Package cards */
 .card {
-  background-color: #1b1b3a;
-  border: 2px solid #444;
-  border-radius: 8px;
-  padding: 12px;
+  background-color: var(--card-bg);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 15px;
   text-align: center;
   cursor: pointer;
-  transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
-  box-sizing: border-box;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .card:hover {
-  transform: scale(1.02);
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .card.selected {
-  border-color: #ffe600;
-  background-color: #2a2a55;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 15px rgba(255, 179, 0, 0.5);
+  transform: scale(1.05);
 }
 
-/* Package cards */
-.card {
-  background-color: #1b1b3a;
-  border: 2px solid #444;
-  border-radius: 8px;
-  padding: 12px;
-  text-align: center;
-  cursor: pointer;
-  transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* Package diamond image - reduced size */
 .card img {
-  width: 30px;  /* Reduced from 40px */
-  height: 30px; /* Reduced from 40px */
-  margin-bottom: 6px; /* Reduced from 8px */
-  object-fit: contain;
+  width: 50px;
+  height: 50px;
+  margin-bottom: 10px;
 }
 
-/* Package card title */
 .card h2 {
-  font-size: 0.95rem;
-  margin-bottom: 6px;
-  color: #fff;
-  line-height: 1.2;
+  font-size: 0.9rem;
+  font-family: var(--font-english);
+  margin-bottom: 5px;
 }
 
-/* Package price */
-.new-price {
-  font-size: 1rem;
-  color: #ffe600;
-  margin-top: auto; /* Pushes price to bottom */
+.card p.new-price {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--accent-color);
 }
 
-/* KHQR payment section */
-.khqr-card {
-  background-color: #1b1b3a;
-  border: 2px solid #444;
-  border-radius: 8px;
-  padding: 12px 12px 12px 80px;
-  margin-top: 10px;
-  color: white;
-  box-sizing: border-box;
-  position: relative;
+.payment-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-}
-
-/* KHQR background image on left side */
-.khqr-card::before {
-  content: "";
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 60px;
-  height: 60px;
-  background-image: url('/static/images/khqr.jpg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-/* KHQR label (bigger font) */
-.khqr-card label {
-  font-size: 1.3rem;
+  background-color: var(--card-bg);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
   cursor: pointer;
-  user-select: none;
-  z-index: 1;
-  flex-grow: 1;
+  transition: border-color 0.3s;
 }
 
-/* KHQR checkbox on right */
-.khqr-card input[type="checkbox"] {
-  order: 2;
-  margin-left: 10px;
-  cursor: pointer;
-  width: 22px;
-  height: 22px;
+.payment-card:hover {
+  border-color: var(--accent-color);
 }
 
-/* KHQR description text */
-.khqr-card p {
+.payment-card label {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.payment-card p {
   font-size: 0.9rem;
-  color: #8fff8f;
-  margin: 6px 0 0 0;
-  flex-basis: 100%;
-  z-index: 1;
+  color: var(--text-secondary);
 }
 
-/* Fixed Buy Now button */
+input[type="checkbox"] {
+  transform: scale(1.5);
+  accent-color: var(--accent-color);
+}
+
 #buyNowBtn {
   position: fixed;
-  bottom: 15px;
-  left: 10px;
-  right: 10px;
-  max-width: 500px;
-  margin: auto;
-  z-index: 999;
-  box-sizing: border-box;
-}
-
-/* Bakong Payment Modal */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1000;
+  bottom: 0;
   left: 0;
-  top: 0;
   width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.7);
-}
-
-.modal-content {
-  background-color: #1b1b3a;
-  color: white;
-  margin: 15% auto;
   padding: 15px;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 280px;
-  box-sizing: border-box;
-  border: 2px solid #444;
-  text-align: center;
-}
-
-.close {
-  color: white;
-  float: right;
-  font-size: 24px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: -5px;
-}
-
-.qr-container {
-  background-color: #0a1f3b;
-  padding: 8px;
-  display: inline-block;
-  margin: 10px auto;
-  border-radius: 5px;
-}
-
-.qr-image {
-  background-color: white;
-  padding: 8px;
-  border-radius: 4px;
-}
-
-#bakongQR {
-  width: 170px;
-  height: 170px;
-  display: block;
-}
-
-#bakongCountdown {
-  font-weight: bold;
-  margin: 8px 0;
-  font-size: 0.95rem;
-}
-
-#bakongStatus {
-  margin: 8px 0;
-  min-height: 18px;
-  font-size: 0.9rem;
-}
-
-.modal-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.bakong-btn {
-  background-color: #f96d00;
+  background-color: var(--accent-color);
   color: white;
   border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
+  font-size: 1.2rem;
+  font-weight: bold;
   cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s ease;
-  flex: 1;
-  max-width: 120px;
+  z-index: 999;
+  transition: background-color 0.3s;
 }
 
-.bakong-btn:hover {
-  background-color: #e67e22;
+#buyNowBtn:hover {
+  background-color: var(--accent-hover);
 }
 
-.bakong-btn:disabled {
-  background-color: #424242;
-  cursor: not-allowed;
-}
-
-/* Responsive improvements */
-@media (min-width: 768px) {
-  .pricing-grid {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  }
-
-  header {
-    font-size: 2rem;
-    padding: 15px 20px 15px 80px;
-  }
-
-  header img {
-    width: 45px;
-    height: 45px;
-  }
-
-  .modal-content {
-    margin: 10% auto;
-  }
-  /* Invoice Modal Styles */
-.invoice-modal {
-  display: none;
+/* --- MODAL STYLES (Added) --- */
+.modal {
+  display: none; /* <--- នេះជាកូដដែលបានបន្ថែម */
   position: fixed;
   z-index: 1001;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.7);
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-.invoice-content {
-  background-color: #1b1b3a;
-  color: white;
+.modal-content {
+  background-color: var(--secondary-bg);
   margin: 10% auto;
-  padding: 20px;
-  border-radius: 10px;
+  padding: 30px;
+  border: 1px solid var(--border-color);
   width: 90%;
-  max-width: 300px;
-  border: 2px solid #444;
-  box-sizing: border-box;
+  max-width: 450px;
+  border-radius: 15px;
+  position: relative;
+  box-shadow: 0 5px 25px rgba(0,0,0,0.6);
+  text-align: center;
+}
+
+.close {
+  color: var(--text-secondary);
+  position: absolute;
+  top: 15px;
+  right: 25px;
+  font-size: 30px;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+.close:hover,
+.close:focus {
+  color: var(--text-primary);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* BAKONG MODAL */
+.qr-container {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem 0;
+}
+
+.qr-image {
+  background-color: white;
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid var(--accent-color);
+}
+
+#bakongQR {
+  width: 220px;
+  height: 220px;
+  display: block;
+}
+
+#bakongStatus, #bakongCountdown {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+#bakongCountdown {
+  font-weight: bold;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 1rem;
+}
+
+.bakong-btn {
+  padding: 12px 25px;
+  border-radius: 8px;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: bold;
+}
+
+.bakong-btn:first-of-type {
+  background-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.bakong-btn:first-of-type:hover {
+  background-color: #444444;
+}
+
+/* INVOICE MODAL */
+.invoice-details {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  padding: 1rem 0;
 }
 
 .invoice-row {
   display: flex;
-  margin-bottom: 10px;
   align-items: center;
+  padding: 10px 0;
 }
 
 .invoice-icon {
-  margin-right: 10px;
-  font-size: 1.2rem;
-  width: 20px;
+  font-size: 1.5rem;
+  width: 40px;
   text-align: center;
+  margin-right: 15px;
+  color: var(--accent-color);
 }
 
 .invoice-label {
-  min-width: 70px;
-  color: #8fff8f;
-  font-size: 0.9rem;
+  color: var(--text-secondary);
+  flex-basis: 35%;
 }
 
 .invoice-value {
-  flex: 1;
-  font-size: 0.9rem;
-  word-break: break-word;
-}
-
-.invoice-btn {
-  background-color: #f96d00;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  width: 100%;
-  margin-top: 15px;
-  font-size: 16px;
-  transition: background-color 0.2s ease;
-}
-
-.invoice-btn:hover {
-  background-color: #e67e22;
-}
-h3 {
-  font-family: 'Battambang', sans-serif;
-  font-weight: 700;
-  color: #fff;
-}
-.khmer-heading {
-  font-family: 'Battambang', sans-serif;
+  color: var(--text-primary);
   font-weight: bold;
-  font-size: 1.5rem;
+  word-break: break-all;
 }
 
+#invoiceModal .modal-buttons .bakong-btn {
+  background-color: var(--accent-color);
+  color: var(--primary-bg);
 }
+
+#invoiceModal .modal-buttons .bakong-btn:hover {
+  background-color: var(--accent-hover);
+}
+
+/* PROMOTION STYLES */
+.promo-card {
+  border: 2px solid var(--accent-color);
+  box-shadow: 0 0 10px rgba(255, 179, 0, 0.7);
+  position: relative;
+  overflow: hidden;
+}
+
+.promo-card::before {
+  content: "PROMO";
+  position: absolute;
+  top: 10px;
+  right: -25px;
+  background-color: var(--accent-color);
+  color: #fff;
+  font-size: 0.7em;
+  font-weight: bold;
+  padding: 2px 20px;
+  transform: rotate(45deg);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+.card.selected.promo-card {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(255, 179, 0, 0.9);
+}
+
+
+/* --- RESPONSIVENESS --- */
+@media (max-width: 600px) {
+  .pricing-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+  }
+  .card h2 {
+    font-size: 0.8rem;
+  }
+  .card img {
+    width: 40px;
+    height: 40px;
+  }
+  .input-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .modal-content {
+    margin: 15% auto;
+    padding: 20px;
+  }
+  }
