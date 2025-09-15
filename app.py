@@ -10,7 +10,7 @@ from bakong_khqr import KHQR
 app = Flask(__name__)
 
 # Bakong API setup
-api_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiYmQwOTRlNGNiMmVlNDdlNCJ9LCJpYXQiOjE3NDkwOTYzMzEsImV4cCI6MTc1Njg3MjMzMX0.ni0qo7UxbrsQ_4P5hliqyVAcIINXQQA-EyCAELf30t4"
+api_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImlkIjoiNDJhN2JlMGRjMmE3NDdjMCJ9LCJpYXQiOjE3NTc4MzY5NjYsImV4cCI6MTc2NTYxMjk2Nn0.nhzmWSEc6mXfV-745YWuIIeE9laroZUtGvZnmCMyYyo"
 khqr = KHQR(api_token)
 current_transactions = {}
 
@@ -137,7 +137,7 @@ def send_to_telegram(transaction):
         requests.post(
             'https://api.telegram.org/bot8370377268:AAGwzEcBfXuBqOmhOdZ7NNVSYPpoK43wv38/sendMessage',
             json={
-                'chat_id': '-1002267674914',
+                'chat_id': '-1002628828546',
                 'text': text
             }
         )
