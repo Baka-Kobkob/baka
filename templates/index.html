@@ -107,218 +107,204 @@
   </div>
 
   <script>
-    const packages = [
-      // កញ្ចប់តម្លៃធម្មតា (Non-Promotion)
-      { name: "100 Diamonds", price: 1.00, image: "ff-diamond-normal.png", type: "normal" },
-      { name: "210 Diamonds", price: 2.00, image: "ff-diamond-normal.png", type: "normal" },
-      { name: "530 Diamonds", price: 5.00, image: "ff-diamond-normal.png", type: "normal" },
-      { name: "1080 Diamonds", price: 10.00, image: "ff-diamond-normal.png", type: "normal" },
-      { name: "2200 Diamonds", price: 20.00, image: "ff-diamond-normal.png", type: "normal" },
+        const packages = [
+  { name: "100 Diamonds", price: 1.00, image: "ff-diamond-normal.png", type: "normal" },
+  { name: "210 Diamonds", price: 2.00, image: "ff-diamond-normal.png", type: "normal" },
+  { name: "530 Diamonds", price: 5.00, image: "ff-diamond-normal.png", type: "normal" },
+  { name: "1080 Diamonds", price: 10.00, image: "ff-diamond-normal.png", type: "normal" },
+  { name: "2200 Diamonds", price: 20.00, image: "ff-diamond-normal.png", type: "normal" },
+  { name: "120 Diamonds (PROMO)", price: 1.00, image: "ff-diamond-promo.png", type: "promo" },
+  { name: "250 Diamonds (PROMO)", price: 2.00, image: "ff-diamond-promo.png", type: "promo" },
+  { name: "Weekly Pass (PROMO)", price: 1.50, image: "ff-weekly-pass.png", type: "promo" },
+];
 
-      // កញ្ចប់ប្រម៉ូសិន (Promotion)
-      { name: "120 Diamonds (PROMO)", price: 1.00, image: "ff-diamond-promo.png", type: "promo" },
-      { name: "250 Diamonds (PROMO)", price: 2.00, image: "ff-diamond-promo.png", type: "promo" },
-      { name: "Weekly Pass (PROMO)", price: 1.50, image: "ff-weekly-pass.png", type: "promo" },
-    ];
+const grid = document.getElementById("packageGrid");
+const buyNowBtn = document.getElementById("buyNowBtn");
+let selectedPrice = 0;
+let selectedName = "";
+let currentTransaction = null;
+let countdownInterval = null;
+let paymentCheckInterval = null;
 
-    const grid = document.getElementById("packageGrid");
-    const buyNowBtn = document.getElementById("buyNowBtn");
-    let selectedPrice = 0;
-    let selectedName = "";
-    let currentTransaction = null;
-    let countdownInterval = null;
-    let paymentCheckInterval = null;
+// -------- Initialize Package Grid --------
+packages.forEach(pkg => {
+  const card = document.createElement("div");
+  card.className = "card";
+  if(pkg.type==="promo") card.classList.add("promo-card");
+  card.dataset.name = pkg.name;
+  card.dataset.price = pkg.price;
+  card.innerHTML = `<img src="/static/images/${pkg.image}" alt="${pkg.name}" />
+                    <h2>${pkg.name}</h2>
+                    <p class="new-price">$${pkg.price.toFixed(2)}</p>`;
+  card.onclick = () => {
+    document.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedPrice = pkg.price;
+    selectedName = pkg.name;
+    buyNowBtn.textContent = `Buy Now $${selectedPrice.toFixed(2)}`;
+  };
+  grid.appendChild(card);
+});
 
-    // -------------------- Initialize Package Grid --------------------
-    packages.forEach(pkg => {
-      const card = document.createElement("div");
-      card.className = "card";
-      if (pkg.type === "promo") {
-        card.classList.add("promo-card"); // Add a class for promotion styles
-      }
-      card.dataset.name = pkg.name;
-      card.dataset.price = pkg.price;
-      card.innerHTML = `
-        <img src="/static/images/${pkg.image}" alt="${pkg.name}" />
-        <h2>${pkg.name}</h2>
-        <p class="new-price">$${pkg.price.toFixed(2)}</p>
-      `;
-      card.onclick = () => {
-        document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-        selectedPrice = pkg.price;
-        selectedName = pkg.name;
-        buyNowBtn.textContent = `Buy Now $${selectedPrice.toFixed(2)}`;
-      };
-      grid.appendChild(card);
+// -------- Username Check --------
+async function checkUsername() {
+  const id = document.getElementById('idInput').value.trim();
+  const display = document.getElementById('usernameDisplay');
+  if(!id){ display.textContent="⚠️ សូមបញ្ចូល Player ID."; return; }
+  display.textContent="កំពុងពិនិត្យឈ្មោះ...";
+  try {
+    const res = await fetch(`https://nang-ff-check-id.vercel.app/api/check-ff`);
+    const data = await res.json();
+    display.textContent=(data.success && data.name)?`✅ ឈ្មោះ: ${data.name}`:"❌ ឈ្មោះមិនត្រឹមត្រូវ.";
+  } catch{
+    display.textContent="⚠️ មានបញ្ហាក្នុងការពិនិត្យ.";
+  }
+}
+
+// -------- Modal Controls --------
+function openModal(){ document.getElementById('bakongModal').style.display='block'; }
+function closeModal(){ 
+  document.getElementById('bakongModal').style.display='none'; 
+  clearInterval(countdownInterval); stopAutoPaymentCheck(); currentTransaction=null;
+}
+function closeInvoiceModal(){ document.getElementById('invoiceModal').style.display='none'; }
+
+// -------- Initiate Payment --------
+async function initiatePayment() {
+  const id = document.getElementById('idInput').value.trim();
+  const khqr = document.getElementById('khqrCheck').checked;
+  if(!id){ alert('សូមបំពេញ Player ID.'); return; }
+  if(!selectedName){ alert('សូមជ្រើសរើសកញ្ចប់.'); return; }
+  if(!khqr){ alert('សូមជ្រើសរើសការទូទាត់.'); return; }
+  openModal();
+  await generateBakongQR(id);
+}
+
+// -------- Generate QR --------
+async function generateBakongQR(playerId) {
+  try{
+    const response = await fetch('/generate_qr',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({amount:selectedPrice,player_id:playerId,package:selectedName})
     });
+    const result = await response.json();
+    if(!response.ok) throw new Error(result.error||'Failed to generate QR');
 
-    // -------------------- Username Check --------------------
-    async function checkUsername() {
-      const id = document.getElementById('idInput').value.trim();
-      const display = document.getElementById('usernameDisplay');
-      if (!id) { display.textContent = "⚠️ សូមបញ្ចូល Player ID."; return; }
-      display.textContent = "កំពុងពិនិត្យឈ្មោះ...";
-      try {
-        const url = `https://nang-ff-check-id.vercel.app/api/check-ff`;
-        const res = await fetch(url);
-        const data = await res.json();
-        display.textContent = (data.success && data.name) ? `✅ ឈ្មោះ: ${data.name}` : "❌ ឈ្មោះមិនត្រឹមត្រូវ.";
-      } catch {
-        display.textContent = "⚠️ មានបញ្ហាក្នុងការពិនិត្យ.";
-      }
-    }
+    currentTransaction={id:result.transaction_id, amount:result.amount, expiry:new Date(result.expiry), playerId, package:selectedName};
+    document.getElementById('bakongQR').src=`data:image/png;base64,${result.qr_image}`;
+    document.getElementById('bakongStatus').textContent=`Scan to pay $${selectedPrice.toFixed(2)}`;
 
-    // -------------------- Modal Controls --------------------
-    function openModal() { document.getElementById('bakongModal').style.display = 'block'; }
-    function closeModal() {
-      document.getElementById('bakongModal').style.display = 'none';
+    startCountdown();
+    startAutoPaymentCheck();
+  } catch(error){
+    document.getElementById('bakongStatus').textContent=`Error: ${error.message}`;
+    document.getElementById('bakongStatus').style.color='#f44336';
+    console.error(error);
+  }
+}
+
+// -------- Countdown --------
+function startCountdown(){
+  clearInterval(countdownInterval);
+  updateCountdown();
+  countdownInterval=setInterval(updateCountdown,1000);
+}
+function updateCountdown(){
+  if(!currentTransaction) return;
+  const remaining = currentTransaction.expiry - new Date();
+  if(remaining<=0){
+    clearInterval(countdownInterval);
+    stopAutoPaymentCheck();
+    document.getElementById('bakongCountdown').textContent='QR Code Expired';
+    document.getElementById('bakongCountdown').style.color='#f44336';
+    document.getElementById('bakongStatus').textContent='QR expired. Please try again.';
+    return;
+  }
+  const mins = Math.floor(remaining/60000);
+  const secs = Math.floor((remaining%60000)/1000);
+  document.getElementById('bakongCountdown').textContent=`Expires in: ${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+  document.getElementById('bakongCountdown').style.color=(mins===0 && secs<30)?'#f44336':'white';
+}
+
+// -------- Auto Payment Check --------
+function startAutoPaymentCheck(){
+  stopAutoPaymentCheck();
+  checkBakongPayment();
+  paymentCheckInterval=setInterval(checkBakongPayment,5000);
+}
+function stopAutoPaymentCheck(){
+  if(paymentCheckInterval) clearInterval(paymentCheckInterval);
+  paymentCheckInterval=null;
+}
+
+// -------- Check Payment --------
+async function checkBakongPayment(){
+  if(!currentTransaction) return;
+  document.getElementById('bakongStatus').textContent='កំពុងពិនិត្យការទូទាត់...';
+  try{
+    const response=await fetch('/check_payment',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({transaction_id:currentTransaction.id})
+    });
+    const result = await response.json();
+
+    if(result.status==='PAID'){
       clearInterval(countdownInterval);
       stopAutoPaymentCheck();
-      currentTransaction = null;
-    }
-    function closeInvoiceModal() { document.getElementById('invoiceModal').style.display = 'none'; }
+      document.getElementById('bakongCountdown').textContent='ទទួលការទូទាត់ហើយ!';
+      document.getElementById('bakongCountdown').style.color='#4caf50';
+      document.getElementById('bakongStatus').textContent=result.message||'ទូទាត់បានជោគជ័យ!';
+      showInvoice(currentTransaction);
+      setTimeout(closeModal,500);
 
-    // -------------------- Payment --------------------
-    async function initiatePayment() {
-      const id = document.getElementById('idInput').value.trim();
-      const khqr = document.getElementById('khqrCheck').checked;
-
-      if (!id) { alert('សូមបំពេញ Player ID.'); return; }
-      if (!selectedName) { alert('សូមជ្រើសរើសកញ្ចប់.'); return; }
-      if (!khqr) { alert('សូមជ្រើសរើសការទូទាត់.'); return; }
-
-      openModal();
-      await generateBakongQR(id);
-    }
-
-    async function generateBakongQR(playerId) {
-      try {
-        const response = await fetch('/generate_qr', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ amount: selectedPrice, player_id: playerId, package: selectedName })
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || 'Failed to generate QR');
-
-        currentTransaction = { id: result.transaction_id, amount: result.amount, expiry: new Date(result.expiry), playerId, package: selectedName };
-        document.getElementById('bakongQR').src = `data:image/png;base64,${result.qr_image}`;
-        document.getElementById('bakongStatus').textContent = `Scan to pay $${selectedPrice.toFixed(2)}`;
-        
-        startCountdown();
-        startAutoPaymentCheck();
-
-      } catch (error) {
-        document.getElementById('bakongStatus').textContent = `Error: ${error.message}`;
-        document.getElementById('bakongStatus').style.color = '#f44336';
-        console.error(error);
-      }
-    }
-
-    // -------------------- Countdown --------------------
-    function startCountdown() {
+    } else if(result.status==='EXPIRED'){
       clearInterval(countdownInterval);
-      updateCountdown();
-      countdownInterval = setInterval(updateCountdown, 1000);
-    }
-
-    function updateCountdown() {
-      if (!currentTransaction) return;
-      const remaining = currentTransaction.expiry - new Date();
-      if (remaining <= 0) {
-        clearInterval(countdownInterval);
-        stopAutoPaymentCheck();
-        document.getElementById('bakongCountdown').textContent = 'QR Code Expired';
-        document.getElementById('bakongCountdown').style.color = '#f44336';
-        document.getElementById('bakongStatus').textContent = 'QR expired. Please try again.';
-        return;
-      }
-      const mins = Math.floor(remaining / 60000);
-      const secs = Math.floor((remaining % 60000) / 1000);
-      document.getElementById('bakongCountdown').textContent = `Expires in: ${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-      document.getElementById('bakongCountdown').style.color = (mins===0 && secs<30) ? '#f44336' : 'white';
-    }
-
-    // -------------------- Auto Payment Check --------------------
-    function startAutoPaymentCheck() {
       stopAutoPaymentCheck();
-      checkBakongPayment(); // initial check
-      paymentCheckInterval = setInterval(checkBakongPayment, 5000);
+      document.getElementById('bakongCountdown').textContent='QR Code ផុតកំណត់';
+      document.getElementById('bakongCountdown').style.color='#f44336';
+      document.getElementById('bakongStatus').textContent=result.message||'QR Code បានផុតកំណត់។ សូមព្យាយាមម្ដងទៀត';
+    } else {
+      document.getElementById('bakongStatus').textContent=result.message||'នៅមិនទាន់ទូទាត់';
     }
+  }catch(error){
+    document.getElementById('bakongStatus').textContent=`កំហុស: ${error.message}`;
+    document.getElementById('bakongStatus').style.color='#f44336';
+    console.error(error);
+  }
+}
 
-    function stopAutoPaymentCheck() {
-      if (paymentCheckInterval) clearInterval(paymentCheckInterval);
-      paymentCheckInterval = null;
-    }
+// -------- Show Invoice --------
+function showInvoice(transaction){
+  const now = new Date();
+  let username=document.getElementById('usernameDisplay').textContent.replace('✅ ឈ្មោះ: ','');
+  document.getElementById('invoice-username').textContent=username||'N/A';
+  document.getElementById('invoice-playerid').textContent=transaction.playerId;
+  document.getElementById('invoice-package').textContent=transaction.package;
+  document.getElementById('invoice-amount').textContent='$'+transaction.amount.toFixed(2);
+  document.getElementById('invoice-date').textContent=now.toLocaleString();
+  document.getElementById('invoiceModal').style.display='block';
+}
 
-    // -------------------- Check Payment --------------------
-    async function checkBakongPayment() {
-      if (!currentTransaction) return;
-      document.getElementById('bakongStatus').textContent = 'Checking payment...';
+// -------- Back to Top-up --------
+function backToTopup(){
+  closeInvoiceModal();
+  document.getElementById('idInput').value='';
+  document.getElementById('usernameDisplay').textContent='';
+  document.getElementById('khqrCheck').checked=false;
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('selected'));
+  buyNowBtn.textContent='Buy Now $0.00';
+  window.scrollTo(0,0);
+}
 
-      try {
-        const response = await fetch('/check_payment', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ transaction_id: currentTransaction.id })
-        });
-        const result = await response.json();
-
-        if (result.status === 'PAID') {
-          clearInterval(countdownInterval);
-          stopAutoPaymentCheck();
-          document.getElementById('bakongCountdown').textContent = 'Payment Received!';
-          document.getElementById('bakongCountdown').style.color = '#4caf50';
-          document.getElementById('bakongStatus').textContent = result.message;
-          showInvoice(currentTransaction);
-          setTimeout(closeModal, 500);
-        } else if (result.status === 'EXPIRED') {
-          clearInterval(countdownInterval);
-          stopAutoPaymentCheck();
-          document.getElementById('bakongCountdown').textContent = 'QR Code Expired';
-          document.getElementById('bakongCountdown').style.color = '#f44336';
-          document.getElementById('bakongStatus').textContent = result.message;
-        } else {
-          document.getElementById('bakongStatus').textContent = result.message;
-        }
-      } catch (error) {
-        document.getElementById('bakongStatus').textContent = `Error: ${error.message}`;
-        document.getElementById('bakongStatus').style.color = '#f44336';
-        console.error(error);
-      }
-    }
-
-    // -------------------- Invoice --------------------
-    function showInvoice(transaction) {
-      const now = new Date();
-      let username = document.getElementById('usernameDisplay').textContent.replace('✅ ឈ្មោះ: ', '');
-      document.getElementById('invoice-username').textContent = username || 'N/A';
-      document.getElementById('invoice-playerid').textContent = transaction.playerId;
-      document.getElementById('invoice-package').textContent = transaction.package;
-      document.getElementById('invoice-amount').textContent = '$' + transaction.amount.toFixed(2);
-      document.getElementById('invoice-date').textContent = now.toLocaleString();
-      document.getElementById('invoiceModal').style.display = 'block';
-    }
-
-    // -------------------- Back to Topup --------------------
-    function backToTopup() {
-      closeInvoiceModal();
-      document.getElementById('idInput').value = '';
-      document.getElementById('usernameDisplay').textContent = '';
-      document.getElementById('khqrCheck').checked = false;
-      document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
-      buyNowBtn.textContent = 'Buy Now $0.00';
-      window.scrollTo(0, 0);
-    }
-
-    // -------------------- Toggle Payment Checkbox --------------------
-    function toggleKhqrSelection() {
-        const khqrCard = document.getElementById('khqrCard');
-        const khqrCheck = document.getElementById('khqrCheck');
-        khqrCheck.checked = !khqrCheck.checked;
-        khqrCard.classList.toggle('selected', khqrCheck.checked);
-    }
+// -------- Toggle KHQR --------
+function toggleKhqrSelection(){
+  const khqrCard=document.getElementById('khqrCard');
+  const khqrCheck=document.getElementById('khqrCheck');
+  khqrCheck.checked=!khqrCheck.checked;
+  khqrCard.classList.toggle('selected', khqrCheck.checked);
+}
   </script>
 </body>
 </html>
